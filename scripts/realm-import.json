@@ -1,0 +1,47 @@
+{
+  "realm": "${REALM_NAME}",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "admin" },
+      { "name": "researcher" },
+      { "name": "user" },
+      { "name": "moderator" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "${CLIENT_NAME}",
+      "enabled": true,
+      "redirectUris": ["${WEB_URL}/*", "${WEB_URL}/api/auth/callback/keycloak"],
+      "webOrigins": ["${WEB_URL}"],
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "${TEST_USER}",
+      "enabled": true,
+      "email": "${TEST_EMAIL}",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${TEST_PASSWORD}"
+        }
+      ],
+      "realmRoles": ["user"]
+    }
+  ]
+}
