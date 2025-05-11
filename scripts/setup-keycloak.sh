@@ -84,4 +84,17 @@ else
   echo "Realm roles added to ID token successfully!"
 fi
 
+echo "Generating new client secret..."
+CLIENT_SECRET_RESPONSE=$(curl -s -X POST "${KEYCLOAK_URL}/admin/realms/${REALM_NAME}/clients/${INTERNAL_CLIENT_ID}/client-secret" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json")
+
+KEYCLOAK_CLIENT_SECRET=$(echo "${CLIENT_SECRET_RESPONSE}" | jq -r .value)
+
+echo "Generated client secret: ${KEYCLOAK_CLIENT_SECRET}"
+
+# Save to env file
+echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" > /generated-secret
+
+
 echo "Keycloak setup completed successfully!"

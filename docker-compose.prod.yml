@@ -1,92 +1,4 @@
 services:
-  db:
-    container_name: postgres_db
-    image: postgres:16
-    platform: linux/arm64
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./db_init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 7s
-      timeout: 5s
-      retries: 7
-    networks:
-      - backend_net
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.1
-    container_name: keycloak
-    command: start-dev
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: postgres
-      KC_DB_URL_HOST: db
-      KC_DB_URL_PORT: 5432
-      KC_DB_URL_DATABASE: ${POSTGRES_DB}
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KC_HEALTH_ENABLED: true
-    ports:
-      - "8081:8080"
-    networks:
-      - backend_net
-    restart: unless-stopped
-    healthcheck:
-      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/health/live']
-      interval: 5s
-      timeout: 5s
-      retries: 30
-
-  keycloak-setup:
-    image: alpine:latest
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    volumes:
-      - ./scripts:/scripts
-    command: sh /scripts/setup-keycloak.sh
-    environment:
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      REALM_NAME: water-way
-      CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      CLIENT_NAME: ${KEYCLOAK_CLIENT_ID}
-      WEB_URL: ${NEXTAUTH_URL}
-      TEST_USER: ${TEST_USER}
-      TEST_PASSWORD: ${TEST_PASSWORD}
-      TEST_EMAIL: ${TEST_EMAIL}
-    networks:
-      - backend_net
-
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    restart: always
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    volumes:
-      - minio_data:/data
-    networks:
-      - backend_net
   app:
     build: .
     container_name: next_app
@@ -95,8 +7,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      keycloak:
-        condition: service_healthy
+      keycloak-setup:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
@@ -106,7 +18,9 @@ services:
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      # Add other envs as needed
+    volumes:
+      - ./scripts:/scripts
+      - ./scripts/generated.env:/app/.env   # Mount generated secret
     networks:
       - backend_net
     restart: unless-stopped
