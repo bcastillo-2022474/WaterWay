@@ -14,7 +14,7 @@ echo "Substituting environment variables in realm-import.json..."
 envsubst < /scripts/realm-import.json > /scripts/realm.json
 
 echo "Checking if realm already exists..."
-if curl -s "${KEYCLOAK_URL}/admin/realms/${REALM_NAME}" | grep -q "${REALM_NAME}"; then
+if curl -s -o /dev/null -w "%{http_code}" "${KEYCLOAK_URL}/admin/realms/${REALM_NAME}" | grep -q "200"; then
   echo "Realm ${REALM_NAME} already exists. Skipping import."
 else
   echo "Getting access token..."
