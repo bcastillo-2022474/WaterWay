@@ -27,7 +27,8 @@
       "fullScopeAllowed": true,
       "attributes": {
         "backchannel.logout.session.required": "true",
-        "backchannel.logout.revoke.offline.tokens": "false"
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "ssl.required": "none"
       }
     }
   ],
