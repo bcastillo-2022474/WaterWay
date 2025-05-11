@@ -1,6 +1,7 @@
 {
   "realm": "${REALM_NAME}",
   "enabled": true,
+  "sslRequired": "none",
   "roles": {
     "realm": [
       { "name": "admin" },
