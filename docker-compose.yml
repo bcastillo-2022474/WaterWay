@@ -57,7 +57,8 @@ services:
         condition: service_healthy
     volumes:
       - ./scripts:/scripts
-    command: sh /scripts/setup-keycloak.sh
+    command: >
+      sh -c "chmod +x /scripts/setup-keycloak.sh && /scripts/setup-keycloak.sh"
     environment:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
