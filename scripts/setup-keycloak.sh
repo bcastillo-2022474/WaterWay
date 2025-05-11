@@ -94,7 +94,7 @@ KEYCLOAK_CLIENT_SECRET=$(echo "${CLIENT_SECRET_RESPONSE}" | jq -r .value)
 echo "Generated client secret: ${KEYCLOAK_CLIENT_SECRET}"
 
 # Save to env file
-echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" > /generated-secret
+echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" > /scripts/keycloak.secret
 
 
 echo "Keycloak setup completed successfully!"
