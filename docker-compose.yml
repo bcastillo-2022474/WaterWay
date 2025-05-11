@@ -2,7 +2,7 @@ services:
   db:
     container_name: postgres_db
     image: postgres:16
-    platform: linux/amd64/v3
+    platform: linux/arm64
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
