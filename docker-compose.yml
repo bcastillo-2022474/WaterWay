@@ -50,28 +50,6 @@ services:
       timeout: 5s
       retries: 30
 
-  keycloak-setup:
-    image: alpine:latest
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    volumes:
-      - ./scripts:/scripts
-    command: sh /scripts/setup-keycloak.sh
-    environment:
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      REALM_NAME: water-way
-      CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      CLIENT_NAME: ${KEYCLOAK_CLIENT_ID}
-      WEB_URL: ${NEXTAUTH_URL}
-      TEST_USER: ${TEST_USER}
-      TEST_PASSWORD: ${TEST_PASSWORD}
-      TEST_EMAIL: ${TEST_EMAIL}
-    networks:
-      - backend_net
-
   minio:
     image: minio/minio:latest
     container_name: minio
