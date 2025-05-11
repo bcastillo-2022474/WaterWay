@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // adjust path to your auth config
+import { authOptions } from "@/lib/auth";
+import Link from "next/link"; // adjust path to your auth config
 
 export default async function ProtectedPage() {
   const session = await getServerSession(authOptions);
@@ -9,7 +10,7 @@ export default async function ProtectedPage() {
     return (
       <div>
         <h1>Unauthorized</h1>
-        <p>Please<a href="/api/auth/signin">sign in</a>.</p>
+        <p>Please<Link href="/api/auth/signin">sign in</Link>.</p>
       </div>
     );
   }
